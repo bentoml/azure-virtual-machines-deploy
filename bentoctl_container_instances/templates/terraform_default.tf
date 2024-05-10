@@ -103,6 +103,25 @@ resource "azurerm_container_group" "bentoml" {
       protocol = "TCP"
     }
   }
+
+  # wait till service is up
+  provisioner "local-exec" {
+    command = <<-EOT
+        attempt_counter=0
+        max_attempts=20
+        printf 'waiting for server to start'
+        until $(curl --output /dev/null --silent --head --fail http://${self.ip_address}:${var.bentoml_port}); do
+            if [ $attempt_counter -eq $max_attempts ];then
+              echo "Max attempts reached"
+              exit 1
+            fi
+
+            printf '.'
+            attempt_counter=$(($attempt_counter+1))
+            sleep 15
+        done
+        EOT
+  }
 }
 
 ################################################################################
@@ -114,5 +133,5 @@ output "resource_group_name" {
 }
 
 output "endpoint" {
-  value = "http://${azurerm_container_group.bentoml.ip_address}:{var.bentoml_port}"
+  value = "http://${azurerm_container_group.bentoml.ip_address}:${var.bentoml_port}"
 }
