@@ -9,6 +9,7 @@ terraform {
 
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
+  features {}
 }
 
 ################################################################################
@@ -89,9 +90,10 @@ resource "azurerm_container_group" "bentoml" {
     password = data.azurerm_container_registry.registry.admin_password
   }
 
-  environment_variables {
-    BENTOMLPORT = "3000"
-  }
+  #environment_variables {
+  #  BENTOMLPORT = "3000"
+  #}
+  
   container {
     name   = "bentoml"
     image  = var.image_tag
